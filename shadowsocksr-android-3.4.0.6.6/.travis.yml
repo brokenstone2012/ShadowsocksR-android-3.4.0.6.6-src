@@ -1,0 +1,47 @@
+language: scala
+jdk:
+- oraclejdk8
+sudo: false
+addons:
+  apt:
+    packages:
+    - gcc-multilib
+    - g++-multilib
+    - libstdc++6:i386
+    - libgcc1:i386
+    - zlib1g:i386
+    - libncurses5:i386
+scala:
+- 2.11.8
+before_cache:
+- find $HOME/.sbt -name "*.lock" | xargs rm
+- find $HOME/.ivy2 -name "*.lock" | xargs rm
+- find $HOME/build/milkice233/shadowsocksr-android/target/
+cache:
+  directories:
+  - "$HOME/.ivy2"
+  - "$HOME/.sbt"
+android:
+  components:
+  - tools
+  - build-tools-25.0.2
+  - extra-android-m2repository
+  - extra-google-m2repository
+install:
+- "./travis-ci/setup.sh"
+- export NDK_CCACHE=ccache
+- export ARCH=`uname -m`
+- export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
+- export ANDROID_HOME=$HOME/.android/android-sdk-linux
+- export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
+- cp local.properties.travis local.properties
+script:
+- sbt native-build android:package-release
+deploy:
+  provider: releases 
+  file: "/home/travis/build/milkice233/shadowsocksr-android/target/android/output/shadowsocksr-release.apk"
+  skip_cleanup: true
+  on:
+    tags: true
+  api-key:
+    secure: XuDWy5BM71311JAFH99CFRFjTScNx6H2T+Cr4WzfWr0XHyjFWS4/BWPavHV6tKIykLcRRgkriQQUhfWuyiix/rkn6UbDw/L1UBURqj6z30Ai1csl4wmxxOW7qY7u9uMYj8LQsdrby8X1x0mdojHrRQnKyN9AGYhJAqw04XXcJvx9Wo4Pcb0J/APjRgW7A7c2i+ptnqbDn/wEh6UBj1G685julWfbo/C+xVB73l3xKtR8tVLeFSCSF5D8W64S6iyeZvbcrZnl4mh1l2SFI019UM8iHqtLbA4CwqWUAWEjnQUvLWp1Mx2D1C3hL5jKE69V5fVpkHlJF3NNgubQChZI0TiQ8R5QE84+yfHYiHAQgP2Xo4tqh+2vc+7jXV7yrvFqs4c5bFXH5wiNeyS5Tz096aq6Wrat3IGAK9LTUixPd/Zd2p88vIDDU8sS+TG7SGWADccZ0Vpt4rDSVutPartNzBh/MpMaKnOhh73IJ0WEhDpa/T0Orwkt5y961lODPPLbAz8KSFDcM0WpANrZ5RM5KwsS/eWm+09QaGLzYH74RovAz9x2f7aNTGHNkjBppx9wIW8wlJtIQN3c8+e4ZN0qDSYjYNbH9M71Fp9+9i3Zob4DNV5yLt9cpZL98/bScnRpmgPyOPB8FUCYWRk5RiKh7BR4x1ej/QyKphZcpHCa7F8=
